@@ -1,7 +1,9 @@
 // app/(onboarding)/index.tsx
+import { db } from '@/services/firebaseConfig';
 import { useRouter } from 'expo-router';
+import { addDoc, collection } from 'firebase/firestore';
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,6 +20,22 @@ export default function NickScreen() {
     // Aqui você salva o nick (ex: AsyncStorage.setItem('nickname', nick))
     router.replace('/(onboarding)/room');
     // ou direto para tabs se quiser pular a sala por enquanto: router.replace('/(tabs)')
+  };
+
+  const testarConexao = async () => {
+    try {
+      // Tenta criar uma coleção chamada "testes" e adicionar um documento
+      const docRef = await addDoc(collection(db, "testes"), {
+        mensagem: "Olá Firebase!",
+        data: new Date(),
+        app: "Expo Kink App"
+      });
+      console.log("Documento escrito com ID: ", docRef.id);
+      Alert.alert("Sucesso!", `Conexão funcionou! ID: ${docRef.id}`);
+    } catch (e) {
+      console.error("Erro ao adicionar documento: ", e);
+      Alert.alert("Erro", "Verifique o console para detalhes.");
+    }
   };
 
   return (
@@ -45,6 +63,11 @@ export default function NickScreen() {
       >
         <ThemedText style={styles.buttonText}>Começar Kink</ThemedText>
       </TouchableOpacity>
+
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Teste do Firebase</Text>
+        <Button title="Testar Banco de Dados" onPress={testarConexao} />
+      </View>
     </ThemedView>
   );
 }
