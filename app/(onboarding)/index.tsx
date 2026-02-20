@@ -3,7 +3,7 @@ import { db } from '@/services/firebaseConfig';
 import { useRouter } from 'expo-router';
 import { addDoc, collection } from 'firebase/firestore';
 import { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -22,13 +22,17 @@ export default function NickScreen() {
     // ou direto para tabs se quiser pular a sala por enquanto: router.replace('/(tabs)')
   };
 
-  const testarConexao = async () => {
+  const criarUsuario = async () => {
+    if (nick.trim().length < 2) {
+      Alert.alert("Erro", "Nick Inválido");
+      console.log("Nick Inválido");
+      return;
+    }
     try {
       // Tenta criar uma coleção chamada "testes" e adicionar um documento
-      const docRef = await addDoc(collection(db, "testes"), {
-        mensagem: "Olá Firebase!",
-        data: new Date(),
-        app: "Expo Kink App"
+      const docRef = await addDoc(collection(db, "users"), {
+        name: `${nick}`,
+        createdAt: new Date(),
       });
       console.log("Documento escrito com ID: ", docRef.id);
       Alert.alert("Sucesso!", `Conexão funcionou! ID: ${docRef.id}`);
@@ -36,6 +40,8 @@ export default function NickScreen() {
       console.error("Erro ao adicionar documento: ", e);
       Alert.alert("Erro", "Verifique o console para detalhes.");
     }
+    // Aqui você salva o nick (ex: AsyncStorage.setItem('nickname', nick))
+    router.replace('/(onboarding)/room');
   };
 
   return (
@@ -58,16 +64,16 @@ export default function NickScreen() {
 
       <TouchableOpacity
         style={[styles.button, nick.trim().length < 2 && styles.buttonDisabled]}
-        onPress={handleStart}
+        onPress={criarUsuario}
         disabled={nick.trim().length < 2}
       >
         <ThemedText style={styles.buttonText}>Começar Kink</ThemedText>
       </TouchableOpacity>
 
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Teste do Firebase</Text>
         <Button title="Testar Banco de Dados" onPress={testarConexao} />
-      </View>
+      </View> */}
     </ThemedView>
   );
 }
