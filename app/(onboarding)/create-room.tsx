@@ -1,23 +1,60 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { db } from '@/services/firebaseConfig';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { addDoc, collection } from 'firebase/firestore';
+import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function CreateRoomScreen() {
   const router = useRouter();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
+
+  const criarSala = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "rooms"), {
+        createdAt: new Date(),
+        hostId: userId,
+        participants: [userId],
+        status: 'waiting',
+        matchedKinks: [],
+      });
+      console.log("Documento escrito com ID: ", docRef.id);
+      Alert.alert("Sucesso!", `Sala criada com ID: ${docRef.id}`);
+    } catch (e) {
+      console.error("Erro ao adicionar documento: ", e);
+      Alert.alert("Erro", "Verifique o console para detalhes.");
+    }
+  }
 
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
         Criar Sala
       </ThemedText>
-      <ThemedText style={styles.description}>
-        Configure sua sala para começar.
-      </ThemedText>
-      
-      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-        <ThemedText style={styles.buttonText}>Voltar</ThemedText>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          criarSala();
+          router.replace({
+            pathname: '/(onboarding)/room',
+            params: { userId: userId }
+          }); 
+        }}
+      >
+        <ThemedText style={styles.buttonText}>Criar Sala</ThemedText>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, { marginTop: 16 }]}
+        onPress={() => {
+          router.replace({
+            pathname: '/(onboarding)/join-room',
+            params: {userId: userId}
+          });
+        }}
+      >
+        <ThemedText style={styles.buttonText}>Entrar Em Sala</ThemedText>
       </TouchableOpacity>
     </ThemedView>
   );
@@ -26,29 +63,32 @@ export default function CreateRoomScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: 40,
   },
   title: {
-    marginBottom: 20,
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  description: {
-    marginBottom: 40,
-    textAlign: 'center',
-    fontSize: 16,
+    color: '#ff2d55',
+    fontSize: 42,
+    marginBottom: 80,
   },
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    width: '100%',
+    height: 64,
     backgroundColor: '#ff2d55',
-    borderRadius: 8,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#ff2d55',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   buttonText: {
     color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });

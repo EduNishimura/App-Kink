@@ -15,13 +15,6 @@ export default function NickScreen() {
   const [nick, setNick] = useState('');
   const router = useRouter();
 
-  const handleStart = () => {
-    if (nick.trim().length < 2) return;
-    // Aqui você salva o nick (ex: AsyncStorage.setItem('nickname', nick))
-    router.replace('/(onboarding)/room');
-    // ou direto para tabs se quiser pular a sala por enquanto: router.replace('/(tabs)')
-  };
-
   const criarUsuario = async () => {
     if (nick.trim().length < 2) {
       Alert.alert("Erro", "Nick Inválido");
@@ -29,19 +22,22 @@ export default function NickScreen() {
       return;
     }
     try {
-      // Tenta criar uma coleção chamada "testes" e adicionar um documento
+      // cria um documento na coleção users
       const docRef = await addDoc(collection(db, "users"), {
         name: `${nick}`,
         createdAt: new Date(),
       });
       console.log("Documento escrito com ID: ", docRef.id);
       Alert.alert("Sucesso!", `Conexão funcionou! ID: ${docRef.id}`);
+      // redireciona para a tela de salas, passando o userId gerado
+      router.replace({
+        pathname: '/(onboarding)/create-room',
+        params: { userId: docRef.id },
+      });
     } catch (e) {
       console.error("Erro ao adicionar documento: ", e);
       Alert.alert("Erro", "Verifique o console para detalhes.");
     }
-    // Aqui você salva o nick (ex: AsyncStorage.setItem('nickname', nick))
-    router.replace('/(onboarding)/room');
   };
 
   return (
@@ -69,11 +65,6 @@ export default function NickScreen() {
       >
         <ThemedText style={styles.buttonText}>Começar Kink</ThemedText>
       </TouchableOpacity>
-
-      {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Teste do Firebase</Text>
-        <Button title="Testar Banco de Dados" onPress={testarConexao} />
-      </View> */}
     </ThemedView>
   );
 }
