@@ -2,12 +2,21 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { db } from '@/services/firebaseConfig';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function CreateRoomScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!userId) return;
+    getDoc(doc(db, 'users', userId)).then((docSnap) => {
+      setUserName(docSnap.data()?.name ?? null);
+    });
+  }, [userId]);
 
   const criarSala = async () => {
     try {
@@ -29,7 +38,7 @@ export default function CreateRoomScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
-        Criar Sala
+        Olá {userName}
       </ThemedText>
 
       <TouchableOpacity

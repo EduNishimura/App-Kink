@@ -43,7 +43,7 @@ export default function NickScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>
-        Kink Match 🔥
+        Kink Match 🥒
       </ThemedText>
 
       <ThemedText style={styles.label}>Insira seu nick</ThemedText>
