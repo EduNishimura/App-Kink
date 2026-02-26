@@ -13,31 +13,35 @@ export default function JoinRoomScreen() {
 
   const entrarSala = async () => {
     if (roomId.trim().length === 0) {
-      Alert.alert("Erro", "Informe o código da sala.");
+      Alert.alert('Erro', 'Informe o código da sala.');
       return;
     }
 
     if (!userId) {
-      Alert.alert("Erro", "ID do usuário não encontrado. Volte ao início.");
+      Alert.alert('Erro', 'ID do usuário não encontrado. Volte ao início.');
       return;
     }
 
     try {
-      const roomRef = doc(db, "rooms", roomId.trim());
+      const roomRef = doc(db, 'rooms', roomId.trim());
       const roomSnap = await getDoc(roomRef);
 
       if (!roomSnap.exists()) {
-        Alert.alert("Erro", "Sala não encontrada. Verifique o código.");
+        Alert.alert('Erro', 'Sala não encontrada. Verifique o código.');
         return;
       }
 
       await updateDoc(roomRef, {
-        participants: arrayUnion(userId), 
+        participants: arrayUnion(userId),
       });
-      Alert.alert("Sucesso!", `Você entrou na sala: ${roomId.trim()}`);
+
+      router.replace({
+        pathname: '/(onboarding)/room',
+        params: { userId, roomId: roomId.trim() },
+      });
     } catch (e) {
-      console.error("Erro ao entrar na sala: ", e);
-      Alert.alert("Erro", "Sala não encontrada ou ocorreu um erro.");
+      console.error('Erro ao entrar na sala: ', e);
+      Alert.alert('Erro', 'Sala não encontrada ou ocorreu um erro.');
     }
   };
 

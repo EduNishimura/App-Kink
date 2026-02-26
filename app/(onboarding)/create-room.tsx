@@ -20,20 +20,23 @@ export default function CreateRoomScreen() {
 
   const criarSala = async () => {
     try {
-      const docRef = await addDoc(collection(db, "rooms"), {
+      const docRef = await addDoc(collection(db, 'rooms'), {
         createdAt: new Date(),
         hostId: userId,
         participants: [userId],
         status: 'waiting',
         matchedKinks: [],
       });
-      console.log("Documento escrito com ID: ", docRef.id);
-      Alert.alert("Sucesso!", `Sala criada com ID: ${docRef.id}`);
+      console.log('Documento escrito com ID: ', docRef.id);
+      router.replace({
+        pathname: '/(onboarding)/room',
+        params: { userId, roomId: docRef.id },
+      });
     } catch (e) {
-      console.error("Erro ao adicionar documento: ", e);
-      Alert.alert("Erro", "Verifique o console para detalhes.");
+      console.error('Erro ao adicionar documento: ', e);
+      Alert.alert('Erro', 'Verifique o console para detalhes.');
     }
-  }
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -41,16 +44,7 @@ export default function CreateRoomScreen() {
         Olá {userName}
       </ThemedText>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          criarSala();
-          router.replace({
-            pathname: '/(onboarding)/room',
-            params: { userId: userId }
-          }); 
-        }}
-      >
+      <TouchableOpacity style={styles.button} onPress={criarSala}>
         <ThemedText style={styles.buttonText}>Criar Sala</ThemedText>
       </TouchableOpacity>
 
@@ -59,7 +53,7 @@ export default function CreateRoomScreen() {
         onPress={() => {
           router.replace({
             pathname: '/(onboarding)/join-room',
-            params: {userId: userId}
+            params: { userId },
           });
         }}
       >
