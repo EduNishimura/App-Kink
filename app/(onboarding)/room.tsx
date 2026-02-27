@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { db } from '@/services/firebaseConfig';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -55,6 +55,10 @@ export default function RoomScreen() {
   const comecarQuestionario = () => {
     Alert.alert('Em breve', 'O questionário será iniciado!');
     // TODO: atualizar status da sala e navegar para o questionário
+    router.replace({
+        pathname: '/(onboarding)/match-session',
+        params: { userId, roomId: roomId.trim() },
+      });
   };
 
   return (
