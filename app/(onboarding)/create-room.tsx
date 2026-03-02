@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { db } from '@/services/firebaseConfig';
+import { createRoom } from '@/services/roomService';
+import { getUserName } from '@/services/userService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -13,27 +13,18 @@ export default function CreateRoomScreen() {
 
   useEffect(() => {
     if (!userId) return;
-    getDoc(doc(db, 'users', userId)).then((docSnap) => {
-      setUserName(docSnap.data()?.name ?? null);
-    });
+    getUserName(userId).then(setUserName);
   }, [userId]);
 
   const criarSala = async () => {
     try {
-      const docRef = await addDoc(collection(db, 'rooms'), {
-        createdAt: new Date(),
-        hostId: userId,
-        participants: [userId],
-        status: 'waiting',
-        matchedKinks: [],
-      });
-      console.log('Documento escrito com ID: ', docRef.id);
+      const roomId = await createRoom(userId);
       router.replace({
         pathname: '/(onboarding)/room',
-        params: { userId, roomId: docRef.id },
+        params: { userId, roomId },
       });
     } catch (e) {
-      console.error('Erro ao adicionar documento: ', e);
+      console.error('Erro ao criar sala: ', e);
       Alert.alert('Erro', 'Verifique o console para detalhes.');
     }
   };

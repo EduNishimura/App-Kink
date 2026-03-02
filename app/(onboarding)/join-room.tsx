@@ -1,8 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { db } from '@/services/firebaseConfig';
+import { joinRoom } from '@/services/roomService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
@@ -23,25 +22,14 @@ export default function JoinRoomScreen() {
     }
 
     try {
-      const roomRef = doc(db, 'rooms', roomId.trim());
-      const roomSnap = await getDoc(roomRef);
-
-      if (!roomSnap.exists()) {
-        Alert.alert('Erro', 'Sala não encontrada. Verifique o código.');
-        return;
-      }
-
-      await updateDoc(roomRef, {
-        participants: arrayUnion(userId),
-      });
-
+      await joinRoom(roomId.trim(), userId);
       router.replace({
         pathname: '/(onboarding)/room',
         params: { userId, roomId: roomId.trim() },
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error('Erro ao entrar na sala: ', e);
-      Alert.alert('Erro', 'Sala não encontrada ou ocorreu um erro.');
+      Alert.alert('Erro', e?.message ?? 'Sala não encontrada ou ocorreu um erro.');
     }
   };
 

@@ -1,15 +1,10 @@
 // app/(onboarding)/index.tsx
-import { db } from '@/services/firebaseConfig';
-import { useRouter } from 'expo-router';
-import { addDoc, collection } from 'firebase/firestore';
-import { useState } from 'react';
-import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-
-// Você pode usar zustand ou mmkv/asyncstorage para salvar o nick depois
-// Por enquanto vamos só navegar
+import { createUser } from '@/services/userService';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 export default function NickScreen() {
   const [nick, setNick] = useState('');
@@ -17,26 +12,18 @@ export default function NickScreen() {
 
   const criarUsuario = async () => {
     if (nick.trim().length < 2) {
-      Alert.alert("Erro", "Nick Inválido");
-      console.log("Nick Inválido");
+      Alert.alert('Erro', 'Nick Inválido');
       return;
     }
     try {
-      // cria um documento na coleção users
-      const docRef = await addDoc(collection(db, "users"), {
-        name: `${nick}`,
-        createdAt: new Date(),
-      });
-      console.log("Documento escrito com ID: ", docRef.id);
-      Alert.alert("Sucesso!", `Conexão funcionou! ID: ${docRef.id}`);
-      // redireciona para a tela de salas, passando o userId gerado
+      const userId = await createUser(nick.trim());
       router.replace({
         pathname: '/(onboarding)/create-room',
-        params: { userId: docRef.id },
+        params: { userId },
       });
     } catch (e) {
-      console.error("Erro ao adicionar documento: ", e);
-      Alert.alert("Erro", "Verifique o console para detalhes.");
+      console.error('Erro ao criar usuário: ', e);
+      Alert.alert('Erro', 'Verifique o console para detalhes.');
     }
   };
 

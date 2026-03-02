@@ -1,16 +1,10 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { db } from '@/services/firebaseConfig';
+import { RoomData, subscribeToRoom } from '@/services/roomService';
+import { getUserNames } from '@/services/userService';
 import { router, useLocalSearchParams } from 'expo-router';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-type RoomData = {
-  hostId: string;
-  participants: string[];
-  status: string;
-};
 
 export default function RoomScreen() {
   const { userId, roomId } = useLocalSearchParams<{ userId: string; roomId: string }>();
@@ -21,33 +15,13 @@ export default function RoomScreen() {
   // Escuta em tempo real o documento da sala
   useEffect(() => {
     if (!roomId) return;
-
-    const roomRef = doc(db, 'rooms', roomId);
-    const unsub = onSnapshot(roomRef, (snap) => {
-      if (snap.exists()) {
-        setRoomData(snap.data() as RoomData);
-      }
-    });
-
-    return () => unsub();
+    return subscribeToRoom(roomId, setRoomData);
   }, [roomId]);
 
   // Busca os nomes sempre que a lista de participantes mudar
   useEffect(() => {
     if (!roomData?.participants?.length) return;
-
-    const fetchNames = async () => {
-      const results = await Promise.all(
-        roomData.participants.map(async (participantId) => {
-          const snap = await getDoc(doc(db, 'users', participantId));
-          const name = snap.exists() ? (snap.data()?.name ?? participantId) : participantId;
-          return { id: participantId, name };
-        })
-      );
-      setParticipantNames(results);
-    };
-
-    fetchNames();
+    getUserNames(roomData.participants).then(setParticipantNames);
   }, [roomData?.participants]);
 
   const isHost = userId === roomData?.hostId;

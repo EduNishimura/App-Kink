@@ -2,7 +2,7 @@
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -22,9 +22,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-if (__DEV__) {
-  connectFirestoreEmulator(db, "localhost", 8080);
-}
 // Initialize Analytics conditionally
 let analytics;
 isSupported().then((supported) => {
