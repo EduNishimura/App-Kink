@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
 /**
@@ -38,4 +38,10 @@ export async function getUserNames(
         })
     );
     return results;
+}
+
+
+/** Deletar usuário */
+export async function deleteUser(userId: string): Promise<void> {
+    await deleteDoc(doc(db, 'users', userId));
 }

@@ -18,7 +18,7 @@ export type RoomData = {
 
 /**
  * Cria uma nova sala na coleção 'rooms'.
- * @returns O ID do documento gerado pelo Firestore.
+ *@returns O ID do documento gerado pelo Firestore.
  */
 export async function createRoom(hostId: string): Promise<string> {
     const docRef = await addDoc(collection(db, 'rooms'), {
@@ -27,6 +27,7 @@ export async function createRoom(hostId: string): Promise<string> {
         participants: [hostId],
         status: 'waiting',
         matchedKinks: [],
+        votes: [],
     });
     return docRef.id;
 }
@@ -46,6 +47,17 @@ export async function joinRoom(roomId: string, userId: string): Promise<void> {
     await updateDoc(roomRef, {
         participants: arrayUnion(userId),
     });
+}
+
+/**
+ * Busca as informações de uma sala pelo ID.
+ * @returns As informações da sala ou null se não encontrada.
+ */
+export async function getRoom(roomId: string): Promise<RoomData | null> {
+    const roomRef = doc(db, 'rooms', roomId);
+    const roomSnap: DocumentSnapshot = await getDoc(roomRef);
+    if (!roomSnap.exists()) return null;
+    return roomSnap.data() as RoomData;
 }
 
 /**
