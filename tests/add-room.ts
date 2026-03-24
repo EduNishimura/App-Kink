@@ -1,3 +1,3 @@
 import { createRoom } from "../services/roomService";
 
-createRoom("EpuEv2f783zKoJO6APNv").then((roomId) => console.log(roomId));
+createRoom("EQ4tT0jGWMjKIhKV97Pq").then((roomId) => console.log(roomId));

@@ -1,4 +1,4 @@
-import { arrayUnion, collection, doc, getDocs, onSnapshot, updateDoc } from "firebase/firestore";
+import { arrayUnion, arrayRemove, collection, doc, getDocs, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 export async function getKinks() {
@@ -10,17 +10,39 @@ export async function getKinks() {
 
 export async function likeKink(roomId: string, userId: string, kink: string): Promise<void> {
     const roomRef = doc(db, "rooms", roomId);
-
-    // No Firestore, a forma mais eficiente de criar esse objeto na prop "votes"
-    // é gravar como um Mapa (Map) onde a chave é o userId e o valor é a lista de kinks.
-    // Exemplo no banco de dados: votes: { "user123": ["alcohol", "armpits"] }
-    //
-    // A notação de ponto ("votes.ID_DO_USUARIO") permite atualizar diretamente o array
-    // do usuário sem precisar ler o documento antes, e o arrayUnion evita duplicadas.
     await updateDoc(roomRef, {
-        [`votes.${userId}`]: arrayUnion(kink)
+        [`votes.${userId}.likes`]: arrayUnion(kink)
     });
 }
+
+export async function dislikeKink(roomId: string, userId: string, kink: string): Promise<void> {
+    const roomRef = doc(db, "rooms", roomId);
+    await updateDoc(roomRef, {
+        [`votes.${userId}.dislikes`]: arrayUnion(kink)
+    });
+}
+
+export async function neutralKink(roomId: string, userId: string, kink: string): Promise<void> {
+    const roomRef = doc(db, "rooms", roomId);
+    await updateDoc(roomRef, {
+        [`votes.${userId}.neutral`]: arrayUnion(kink)
+    });
+}
+
+/**
+ * Remove o kink de todas as listas de votos (likes, dislikes e neutral)
+ */
+export async function removeKinkVote(roomId: string, userId: string, kink: string): Promise<void> {
+    const roomRef = doc(db, "rooms", roomId);
+    await updateDoc(roomRef, {
+        [`votes.${userId}.likes`]: arrayRemove(kink),
+        [`votes.${userId}.dislikes`]: arrayRemove(kink),
+        [`votes.${userId}.neutral`]: arrayRemove(kink)
+    });
+}
+
+
+
 
 /**
  * Escuta em tempo real os votos da sala. Assim que houver votos de 2 ou mais pessoas,
@@ -43,13 +65,13 @@ export function getMatchedKinks(roomId: string): () => void {
         // Só há match se pelo menos 2 pessoas tiverem votado
         if (userIds.length < 2) return;
 
-        // Pegamos um array com as listas de votos de todo mundo: [ ["k1", "k2"], ["k2", "k3"] ]
-        const allVotesLists = Object.values(votes) as string[][];
+        // Pegamos um array com as listas de likes de todo mundo
+        const allLikesLists: string[][] = Object.values(votes).map((userVotes: any) => userVotes.likes || []);
 
-        // Calcular a interseção de kinks entre TODOS os usuários da sala
-        let matched = allVotesLists[0];
-        for (let i = 1; i < allVotesLists.length; i++) {
-            matched = matched.filter((kink) => allVotesLists[i].includes(kink));
+        // Calcular a interseção de kinks curtidos entre TODOS os usuários da sala
+        let matched = allLikesLists[0];
+        for (let i = 1; i < allLikesLists.length; i++) {
+            matched = matched.filter((kink) => allLikesLists[i].includes(kink));
         }
 
         const currentMatchedKinks = data.matchedKinks || [];
@@ -67,4 +89,5 @@ export function getMatchedKinks(roomId: string): () => void {
         }
     });
 }
+
 

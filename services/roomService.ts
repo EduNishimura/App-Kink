@@ -14,6 +14,8 @@ export type RoomData = {
     hostId: string;
     participants: string[];
     status: string;
+    matchedKinks?: string[];
+    votes?: Record<string, string[]>;
 };
 
 /**
@@ -73,5 +75,12 @@ export function subscribeToRoom(
         if (snap.exists()) {
             onUpdate(snap.data() as RoomData);
         }
+    });
+}
+
+export async function startGame(roomId: string): Promise<void> {
+    const roomRef = doc(db, 'rooms', roomId);
+    await updateDoc(roomRef, {
+        status: 'active',
     });
 }

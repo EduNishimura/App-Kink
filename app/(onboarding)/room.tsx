@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { RoomData, subscribeToRoom } from '@/services/roomService';
+import { RoomData, startGame, subscribeToRoom } from '@/services/roomService';
 import { getUserNames } from '@/services/userService';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,16 @@ export default function RoomScreen() {
     return subscribeToRoom(roomId, setRoomData);
   }, [roomId]);
 
+  // Navega automaticamente quando o status da sala muda para "active"
+  useEffect(() => {
+    if (roomData?.status === 'active') {
+      router.replace({
+        pathname: '/(onboarding)/match-session',
+        params: { userId, roomId: roomId.trim() },
+      });
+    }
+  }, [roomData?.status]);
+
   // Busca os nomes sempre que a lista de participantes mudar
   useEffect(() => {
     if (!roomData?.participants?.length) return;
@@ -33,6 +43,10 @@ export default function RoomScreen() {
         pathname: '/(onboarding)/match-session',
         params: { userId, roomId: roomId.trim() },
       });
+
+    // atualizar status da sala para "playing"
+    if (!roomId) return;
+    startGame(roomId);
   };
 
   return (

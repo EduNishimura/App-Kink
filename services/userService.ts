@@ -6,6 +6,15 @@ import { db } from './firebaseConfig';
  * @returns O ID do documento gerado pelo Firestore.
  */
 export async function createUser(name: string): Promise<string> {
+
+    if (name === "") {
+        throw new Error("Nome do usuário não pode ser vazio.");
+    }
+
+    if (name.length > 20) {
+        throw new Error("Nome do usuário deve ter no máximo 20 caracteres.");
+    }
+
     const docRef = await addDoc(collection(db, 'users'), {
         name,
         createdAt: new Date(),
