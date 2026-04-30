@@ -13,15 +13,15 @@ export default function CreateRoomScreen() {
 
   useEffect(() => {
     if (!userId) return;
-    getUserName(userId).then(setUserName);
+    getUserName(userId!).then(setUserName);
   }, [userId]);
 
   const criarSala = async () => {
     try {
-      const roomId = await createRoom(userId);
+      const room = await createRoom(userId!);
       router.replace({
         pathname: '/(onboarding)/room',
-        params: { userId, roomId },
+        params: { userId, roomId: room.id },
       });
     } catch (e) {
       console.error('Erro ao criar sala: ', e);

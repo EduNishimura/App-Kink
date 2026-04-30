@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { joinRoom } from '@/services/roomService';
+import { joinRoomByCode } from '@/services/roomService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
@@ -8,10 +8,10 @@ import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 export default function JoinRoomScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const [roomId, setRoomId] = useState('');
+  const [code, setCode] = useState('');
 
   const entrarSala = async () => {
-    if (roomId.trim().length === 0) {
+    if (code.trim().length === 0) {
       Alert.alert('Erro', 'Informe o código da sala.');
       return;
     }
@@ -22,10 +22,10 @@ export default function JoinRoomScreen() {
     }
 
     try {
-      await joinRoom(roomId.trim(), userId);
+      const fetchedRoomId = await joinRoomByCode(code.trim(), userId);
       router.replace({
         pathname: '/(onboarding)/room',
-        params: { userId, roomId: roomId.trim() },
+        params: { userId, roomId: fetchedRoomId },
       });
     } catch (e: any) {
       console.error('Erro ao entrar na sala: ', e);
@@ -43,16 +43,17 @@ export default function JoinRoomScreen() {
         style={styles.input}
         placeholder="Código da sala"
         placeholderTextColor="#888"
-        value={roomId}
-        onChangeText={setRoomId}
-        autoCapitalize="none"
+        value={code}
+        onChangeText={setCode}
+        autoCapitalize="characters"
         autoCorrect={false}
+        maxLength={6}
       />
 
       <TouchableOpacity
-        style={[styles.button, roomId.trim().length === 0 && styles.buttonDisabled]}
+        style={[styles.button, code.trim().length === 0 && styles.buttonDisabled]}
         onPress={entrarSala}
-        disabled={roomId.trim().length === 0}
+        disabled={code.trim().length === 0}
       >
         <ThemedText style={styles.buttonText}>Entrar Em Sala</ThemedText>
       </TouchableOpacity>

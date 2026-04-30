@@ -53,7 +53,7 @@ export default function RoomScreen() {
     <ThemedView style={styles.container}>
       {/* Código da sala */}
       <ThemedText style={styles.label}>Código da Sala</ThemedText>
-      <ThemedText style={styles.roomId}>{roomId}</ThemedText>
+      <ThemedText style={styles.roomId}>{roomData?.code}</ThemedText>
 
       {/* Lista de participantes */}
       <ThemedText style={styles.sectionTitle}>Participantes</ThemedText>
