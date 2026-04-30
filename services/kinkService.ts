@@ -1,11 +1,12 @@
-import { arrayUnion, arrayRemove, collection, doc, getDocs, onSnapshot, updateDoc } from "firebase/firestore";
+import { shuffleArray } from "@/scripts/shuffle-array";
+import { arrayRemove, arrayUnion, collection, doc, getDocs, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 export async function getKinks() {
     const kinksCollection = collection(db, "kink");
     const kinksSnapshot = await getDocs(kinksCollection);
     const kinks = kinksSnapshot.docs.map((doc) => doc.data());
-    return kinks.map((kink) => kink.name);
+    return shuffleArray(kinks.map((kink) => kink.name));
 }
 
 export async function likeKink(roomId: string, userId: string, kink: string): Promise<void> {
